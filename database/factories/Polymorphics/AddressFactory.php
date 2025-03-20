@@ -24,7 +24,7 @@ class AddressFactory extends Factory
             'slug'             => Str::slug($this->faker->word()),
             'is_main'          => $this->faker->boolean,
             'zipcode'          => $this->faker->postcode,
-            'state'            => $this->faker->state,
+            // 'state'            => $this->faker->state,
             'uf'               => $this->faker->randomElement([
                 'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE',
                 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'

@@ -4,11 +4,14 @@ namespace App\Filament\Pages\System;
 
 use App\Enums\ProfileInfos\SocialMediaEnum;
 use App\Enums\ProfileInfos\UfEnum;
+use App\Services\Polymorphics\AddressService;
+use App\Services\System\TenantCategoryService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Pages\Tenancy\EditTenantProfile;
 use Illuminate\Support\Str;
 use Filament\Support;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class EditTenantAccount extends EditTenantProfile
@@ -70,28 +73,45 @@ class EditTenantAccount extends EditTenantProfile
                     ->relationship(
                         name: 'categories',
                         titleAttribute: 'name',
+                        modifyQueryUsing: fn(TenantCategoryService $service, Builder $query): Builder =>
+                        $service->getQueryByTenantCategories(query: $query)
                     )
                     ->multiple()
                     ->searchable()
                     ->preload()
                     ->required()
+                    // ->when(
+                    //     auth()->user()->can('Cadastrar Categorias de Contas'),
+                    //     fn(Forms\Components\Select $component): Forms\Components\Select =>
+                    //     $component->suffixAction(
+                    //         fn(TenantCategoryService $service): Forms\Components\Actions\Action =>
+                    //         $service->getQuickCreateActionByTenantCategories(field: 'categories', multiple: true),
+                    //     ),
+                    // )
                     ->columnSpanFull(),
                 Forms\Components\SpatieMediaLibraryFileUpload::make('avatar')
                     ->label(__('Logo/Avatar'))
-                    ->helperText(__('Tipos de arquivo permitidos: .png, .jpg, .jpeg, .gif. // Máx. 500x500px // 5 mb.'))
+                    ->helperText(__('Tipos de arquivo permitidos: .png, .jpg, .jpeg, .gif. // 500x500px // máx. 5 mb.'))
                     ->collection('avatar')
                     ->image()
-                    // ->responsiveImages()
+                    ->avatar()
+                    ->downloadable()
+                    ->imageEditor()
+                    ->imageEditorAspectRatios([
+                        // '16:9', // ex: 1920x1080px
+                        // '4:3',  // ex: 1024x768px
+                        '1:1',  // ex: 500x500px
+                    ])
+                    ->circleCropper()
+                    ->imageResizeTargetWidth(500)
+                    ->imageResizeTargetHeight(500)
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/jpg', 'image/gif'])
+                    ->maxSize(5120)
                     ->getUploadedFileNameForStorageUsing(
                         fn(TemporaryUploadedFile $file, callable $get): string =>
-                        (string) str('-' . md5(uniqid()) . '-' . time() . '.' . $file->extension())
+                        (string) str('-' . md5(uniqid()) . '-' . time() . '.' . $file->guessExtension())
                             ->prepend(Str::slug($get('name'))),
-                    )
-                    ->imageResizeMode('contain')
-                    ->imageResizeTargetWidth('500')
-                    ->imageResizeTargetHeight('500')
-                    ->imageResizeUpscale(false)
-                    ->maxSize(5120),
+                    ),
             ])
             ->columns(2)
             ->collapsible();
@@ -118,7 +138,10 @@ class EditTenantAccount extends EditTenantProfile
                     ->schema([
                         Forms\Components\TextInput::make('email')
                             ->label(__('Email'))
-                            ->maxLength(255),
+                            ->email()
+                            // ->required()
+                            ->maxLength(255)
+                            ->live(onBlur: true),
                         Forms\Components\TextInput::make('name')
                             ->label(__('Tipo de email'))
                             ->helperText(__('Nome identificador. Ex: Pessoal, Trabalho...'))
@@ -136,7 +159,6 @@ class EditTenantAccount extends EditTenantProfile
                         $state['email'] ?? null
                     )
                     ->addActionLabel(__('Adicionar email'))
-                    ->defaultItems(0)
                     ->reorderableWithButtons()
                     ->collapsible()
                     ->collapseAllAction(
@@ -159,9 +181,9 @@ class EditTenantAccount extends EditTenantProfile
                                     $input.length === 14 ? '(99) 9999-9999' : '(99) 99999-9999'
                                 JS)
                             )
-                            ->required()
-                            ->live(onBlur: true)
-                            ->maxLength(255),
+                            // ->required()
+                            ->maxLength(255)
+                            ->live(onBlur: true),
                         Forms\Components\TextInput::make('name')
                             ->label(__('Tipo de contato'))
                             ->helperText(__('Nome identificador. Ex: Celular, Whatsapp, Casa, Trabalho...'))
@@ -275,28 +297,51 @@ class EditTenantAccount extends EditTenantProfile
                         Forms\Components\TextInput::make('address.zipcode')
                             ->label(__('CEP'))
                             ->mask('99999-999')
-                            ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(
+                                function (AddressService $service, ?string $state, ?string $old, callable $set): void {
+                                    if ($old === $state) {
+                                        return;
+                                    }
+
+                                    $address = $service->getAddressByZipcodeBrasilApi(zipcode: $state);
+
+                                    if (isset($address['error'])) {
+                                        $set('address.uf', null);
+                                        $set('address.city', null);
+                                        $set('address.district', null);
+                                        $set('address.address_line', null);
+                                        $set('address.complement', null);
+                                    } else {
+                                        $set('address.uf', $address['state']);
+                                        $set('address.city', $address['city']);
+                                        $set('address.district', $address['neighborhood']);
+                                        $set('address.address_line', $address['street']);
+                                        // $set('address.complement', null);
+                                    }
+                                }
+                            ),
                     ])
                     ->columns(2)
                     ->columnSpanFull(),
                 Forms\Components\Select::make('address.uf')
                     ->label(__('Estado'))
                     ->options(UfEnum::class)
-                    // ->placeholder(__('Informe primeiramente o CEP'))
+                    ->placeholder(__('Informe primeiramente o CEP'))
                     ->selectablePlaceholder(false)
                     ->searchable()
                     ->native(false)
                     ->required()
-                    // ->disabled()
+                    ->disabled()
                     ->dehydrated(),
                 Forms\Components\TextInput::make('address.city')
                     ->label(__('Cidade'))
-                    // ->placeholder(__('Informe primeiramente o CEP'))
+                    ->placeholder(__('Informe primeiramente o CEP'))
                     ->required()
                     ->minLength(2)
                     ->maxLength(255)
-                    // ->disabled()
+                    ->disabled()
                     ->dehydrated(),
                 Forms\Components\TextInput::make('address.district')
                     ->label(__('Bairro'))
@@ -306,7 +351,7 @@ class EditTenantAccount extends EditTenantProfile
                     ->maxLength(255),
                 Forms\Components\TextInput::make('address.number')
                     ->label(__('Número'))
-                    ->minLength(2)
+                    // ->minLength(2)
                     ->maxLength(255),
                 Forms\Components\TextInput::make('address.complement')
                     ->label(__('Complemento'))

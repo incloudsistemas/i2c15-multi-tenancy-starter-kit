@@ -2,8 +2,6 @@
 
 namespace Database\Seeders\System;
 
-use App\Models\System\Role;
-use App\Models\System\TenantAccount;
 use App\Models\System\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -42,9 +40,11 @@ class UsersSeeder extends Seeder
         // Delay of 1 seconds
         sleep(1);
 
-        User::factory(30)->create()->each(function ($user) {
-            $user->syncRoles(['Cliente', 'Administrador']);
-        });
+        User::factory(10)
+            ->create()
+            ->each(function ($user) {
+                $user->assignRole('Administrador');
+            });
     }
 
     protected function truncateTable()
@@ -52,7 +52,8 @@ class UsersSeeder extends Seeder
         $this->command->info('Truncating Users table');
         Schema::disableForeignKeyConstraints();
 
-        DB::table('users')->truncate();
+        DB::table('users')
+            ->truncate();
 
         Schema::enableForeignKeyConstraints();
     }

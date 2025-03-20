@@ -23,8 +23,10 @@ return [
             //
         ],
         'Administrador' => [
-            'Usuários'          => 'c,r,u,d',
-            'Níveis de Acessos' => 'c,r,u,d',
+            'Usuários'             => 'c,r,u,d',
+            'Planos'               => 'c,r,u,d',
+            'Contas de Clientes'   => 'c,r,u,d',
+            'Categorias de Contas' => 'c,r,u,d',
         ],
     ],
 

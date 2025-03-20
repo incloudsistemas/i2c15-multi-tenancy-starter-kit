@@ -25,7 +25,8 @@ class TenantAccountsSeeder extends Seeder
         $this->command->info('Truncating Tenant Accounts table');
         Schema::disableForeignKeyConstraints();
 
-        DB::table('tenant_accounts')->truncate();
+        DB::table('tenant_accounts')
+            ->truncate();
 
         Schema::enableForeignKeyConstraints();
     }

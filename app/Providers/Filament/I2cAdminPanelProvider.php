@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\I2cAdmin\Widgets\AppInfoWidget;
+use App\Filament\Pages\System\EditProfile;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -12,6 +13,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -35,7 +37,11 @@ class I2cAdminPanelProvider extends PanelProvider
             ->brandLogo(asset('images/i2c-logo.png'))
             ->brandLogoHeight('2rem')
             ->sidebarCollapsibleOnDesktop()
+            ->profile(EditProfile::class)
+            ->maxContentWidth(MaxWidth::Full)
             ->userMenuItems([
+                'profile' => Navigation\MenuItem::make()
+                    ->label('Meu Perfil'),
                 Navigation\MenuItem::make()
                     ->label('Website')
                     ->url('/')
@@ -68,6 +74,7 @@ class I2cAdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->databaseTransactions();
     }
 }

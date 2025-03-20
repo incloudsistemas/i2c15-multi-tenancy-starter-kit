@@ -17,7 +17,8 @@ class TenantCategoriesSeeder extends Seeder
     {
         $this->truncateTable();
 
-        TenantCategory::factory(50)->create();
+        TenantCategory::factory(50)
+            ->create();
     }
 
     protected function truncateTable()
@@ -25,7 +26,8 @@ class TenantCategoriesSeeder extends Seeder
         $this->command->info('Truncating Tenant Categories table');
         Schema::disableForeignKeyConstraints();
 
-        DB::table('tenant_categories')->truncate();
+        DB::table('tenant_categories')
+            ->truncate();
 
         Schema::enableForeignKeyConstraints();
     }

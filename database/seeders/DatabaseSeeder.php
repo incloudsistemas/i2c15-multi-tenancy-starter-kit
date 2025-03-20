@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Database\Seeders\System\RolesAndPermissionsSeeder;
 use Database\Seeders\System\TenantAccountsSeeder;
 use Database\Seeders\System\TenantCategoriesSeeder;

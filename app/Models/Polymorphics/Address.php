@@ -37,7 +37,7 @@ class Address extends Model
 
     protected $casts = [
         'is_main' => 'boolean',
-        'uf'      => UfEnum::class
+        'uf'      => UfEnum::class,
     ];
 
     public function addressable(): MorphTo

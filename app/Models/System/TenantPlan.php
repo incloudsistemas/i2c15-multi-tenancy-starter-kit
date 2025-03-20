@@ -44,7 +44,7 @@ class TenantPlan extends Model
 
     public function tenantAccounts(): HasMany
     {
-        return $this->hasMany(related: TenantAccount::class);
+        return $this->hasMany(related: TenantAccount::class, foreignKey: 'plan_id');
     }
 
     public function sluggable(): array

@@ -24,15 +24,9 @@ class TenantAccountFactory extends Factory
     {
         $name = $this->faker->company();
 
-        $owner = User::whereHas('roles', function ($query) {
-            $query->whereIn('name', ['Cliente', 'Administrador']);
-        })
-            ->inRandomOrder()
-            ->first();
-
         return [
             'plan_id'       => TenantPlan::inRandomOrder()->value('id') ?? TenantPlan::factory(),
-            'user_id'       => $owner?->id ?? User::factory(),
+            'user_id'       => User::factory(),
             'role'          => $this->faker->randomElement(['1']),
             'name'          => $name,
             'slug'          => Str::slug($name . '-' . uniqid()),
@@ -103,14 +97,17 @@ class TenantAccountFactory extends Factory
             $tenant->categories()
                 ->attach($categories);
 
-            // Attach all Superadmins to the Tenant
-            $superadmins = User::whereHas('roles', function ($query) {
-                $query->where('name', 'Superadministrador');
+            // Ensures that the user has the role 2 - Cliente
+            $tenant->owner->assignRole('Cliente');
+
+            // Attach all Superadmins and Admins to the Tenant
+            $admins = User::whereHas('roles', function ($query) {
+                $query->whereIn('name', ['Superadministrador', 'Administrador']);
             })
                 ->pluck('id')
                 ->toArray();
 
-            $usersToAttach = array_unique(array_merge($superadmins, [$tenant->user_id]));
+            $usersToAttach = array_unique(array_merge($admins, [$tenant->user_id]));
 
             $tenant->users()
                 ->attach($usersToAttach);

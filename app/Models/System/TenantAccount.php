@@ -141,6 +141,70 @@ class TenantAccount extends Model implements HasMedia
      *
      */
 
+    public function getDisplayMainEmailAttribute(): ?string
+    {
+        return $this->emails[0]['email'] ?? null;
+    }
+
+    public function getDisplayAdditionalEmailsAttribute(): ?array
+    {
+        $additionalEmails = [];
+
+        if (isset($this->emails[1]['email'])) {
+            foreach (array_slice($this->emails, 1) as $email) {
+                $additionalEmail = $email['email'];
+
+                if (!empty($email['name'])) {
+                    $additionalEmail .= " ({$email['name']})";
+                }
+
+                $additionalEmails[] = $additionalEmail;
+            }
+        }
+
+        return !empty($additionalEmails) ? $additionalEmails : null;
+    }
+
+    public function getDisplayMainPhoneAttribute(): ?string
+    {
+        return $this->phones[0]['number'] ?? null;
+    }
+
+    public function getDisplayMainPhoneWithNameAttribute(): ?string
+    {
+        if (isset($this->phones[0]['number'])) {
+            $mainPhone = $this->phones[0]['number'];
+            $phoneName = $this->phones[0]['name'] ?? null;
+
+            if (!empty($phoneName)) {
+                $mainPhone .= " ({$phoneName})";
+            }
+
+            return $mainPhone;
+        }
+
+        return null;
+    }
+
+    public function getDisplayAdditionalPhonesAttribute(): ?array
+    {
+        $additionalPhones = [];
+
+        if (isset($this->phones[1]['number'])) {
+            foreach (array_slice($this->phones, 1) as $phone) {
+                $additionalPhone = $phone['number'];
+
+                if (!empty($phone['name'])) {
+                    $additionalPhone .= " ({$phone['name']})";
+                }
+
+                $additionalPhones[] = $additionalPhone;
+            }
+        }
+
+        return !empty($additionalPhones) ? $additionalPhones : null;
+    }
+
     public function getFeaturedImageAttribute(): ?Media
     {
         $featuredImage = $this->getFirstMedia('avatar');
@@ -150,5 +214,10 @@ class TenantAccount extends Model implements HasMedia
         }
 
         return $featuredImage ?? null;
+    }
+
+    public function getAttachmentsAttribute()
+    {
+        return $this->getMedia('attachments');
     }
 }

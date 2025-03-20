@@ -4,6 +4,7 @@ namespace App\Filament\Pages\System;
 
 use App\Enums\ProfileInfos\UfEnum;
 use App\Models\System\User;
+use App\Services\Polymorphics\AddressService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Pages\Tenancy\RegisterTenant;
@@ -61,28 +62,63 @@ class RegisterTenantAccount extends RegisterTenant
                         Forms\Components\TextInput::make('address.zipcode')
                             ->label(__('CEP'))
                             ->mask('99999-999')
-                            ->required()
                             ->maxLength(255)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(
+                                function (AddressService $service, ?string $state, ?string $old, callable $set): void {
+                                    if ($old === $state) {
+                                        return;
+                                    }
+
+                                    $address = $service->getAddressByZipcodeBrasilApi(zipcode: $state);
+
+                                    if (isset($address['error'])) {
+                                        $set('address.uf', null);
+                                        $set('address.city', null);
+                                        $set('address.district', null);
+                                        $set('address.address_line', null);
+                                        $set('address.complement', null);
+                                    } else {
+                                        $set('address.uf', $address['state']);
+                                        $set('address.city', $address['city']);
+                                        $set('address.district', $address['neighborhood']);
+                                        $set('address.address_line', $address['street']);
+                                        // $set('address.complement', null);
+                                    }
+                                }
+                            )
                             ->columnSpanFull(),
                         Forms\Components\Select::make('address.uf')
                             ->label(__('Estado'))
                             ->options(UfEnum::class)
-                            // ->placeholder(__('Informe primeiramente o CEP'))
+                            ->placeholder(__('Informe primeiramente o CEP'))
                             ->selectablePlaceholder(false)
                             ->searchable()
                             ->native(false)
                             ->required()
-                            // ->disabled()
+                            ->disabled()
                             ->dehydrated()
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('address.city')
                             ->label(__('Cidade'))
-                            // ->placeholder(__('Informe primeiramente o CEP'))
+                            ->placeholder(__('Informe primeiramente o CEP'))
                             ->required()
                             ->minLength(2)
                             ->maxLength(255)
-                            // ->disabled()
+                            ->disabled()
                             ->dehydrated()
+                            ->columnSpanFull(),
+                        Forms\Components\Select::make('address.uf')
+                            ->label(__('Estado'))
+                            ->options(UfEnum::class)
+                            ->selectablePlaceholder(false)
+                            ->searchable()
+                            ->native(false)
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('address.city')
+                            ->label(__('Cidade'))
+                            ->minLength(2)
+                            ->maxLength(255)
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('address.district')
                             ->label(__('Bairro'))
@@ -94,7 +130,7 @@ class RegisterTenantAccount extends RegisterTenant
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('address.number')
                             ->label(__('Número'))
-                            ->minLength(2)
+                            // ->minLength(2)
                             ->maxLength(255)
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('address.complement')
