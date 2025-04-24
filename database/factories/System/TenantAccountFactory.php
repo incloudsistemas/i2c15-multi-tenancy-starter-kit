@@ -84,10 +84,11 @@ class TenantAccountFactory extends Factory
     {
         return $this->afterCreating(function (TenantAccount $tenant) {
             // Create an Address related to the Tenant
-            Address::factory()->create([
-                'addressable_id'   => $tenant->id,
-                'addressable_type' => MorphMapByClass(model: TenantAccount::class),
-            ]);
+            Address::factory()
+                ->create([
+                    'addressable_id'   => $tenant->id,
+                    'addressable_type' => MorphMapByClass(model: TenantAccount::class),
+                ]);
 
             // Attach one or more existing Categories to the Tenant
             $categories = TenantCategory::inRandomOrder()

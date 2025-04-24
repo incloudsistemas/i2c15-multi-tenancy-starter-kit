@@ -3,5 +3,5 @@
 return [
     App\Providers\AppServiceProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
-    App\Providers\Filament\I2cAdminPanelProvider::class,
+    App\Providers\Filament\TenantPanelProvider::class,
 ];

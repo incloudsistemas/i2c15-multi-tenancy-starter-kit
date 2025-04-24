@@ -1,23 +1,12 @@
-@php
-    $tenantAccount = filament()->getTenant();
-@endphp
-
 <x-filament-widgets::widget class="fi-filament-info-widget">
     <x-filament::section>
-        <div class="flex items-center gap-x-3">
-            <x-filament-panels::avatar.user size="lg" :user="$tenantAccount" />
-
-            {{-- <img class="fi-avatar object-cover object-center fi-circular rounded-full h-10 w-10 fi-user-avatar"
-                src="{{ CreateThumb(src: $tenantAccount->featured_image?->getUrl(), width: 64, height: 64) }}"
-                alt="{{ $tenantAccount->name }}"> --}}
+        <div class="flex items-center gap-x-3 py-1">
+            <img src="{{ asset('images/i2c-logo.png') }}" width="65" title="InCloudCodile15"
+                alt="InCloudCodile15" />
 
             <div class="flex-1">
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ config('app.name') }}
-                </p>
-
-                <h2 class="grid flex-1 text-base font-semibold leading-6 text-gray-950 dark:text-white">
-                    {{ LimitCharsFromString(string: $tenantAccount->name, numChars: 28) }}
+                <h2 class="grid flex-1 text-base font-semibold leading-6 text-gray-500 dark:text-white">
+                    InCloudCodile15
                 </h2>
             </div>
 

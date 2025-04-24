@@ -2,8 +2,11 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\AppInfoWidget;
 use App\Filament\Pages\System\EditProfile;
+use App\Filament\Tenant\Pages\System\EditTenantAccount;
+use App\Filament\Tenant\Pages\System\RegisterTenantAccount;
+use App\Filament\Tenant\Widgets\AppInfoWidget;
+use App\Models\System\TenantAccount;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -22,18 +25,17 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+class TenantPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('i2c-admin')
+            ->id('tenant')
+            ->path('admin')
             ->login()
             ->passwordReset()
             ->colors([
-                'primary' => Color::Violet,
+                'primary' => Color::Yellow,
             ])
             ->favicon(url: asset('images/i2c-favicon.ico'))
             ->brandLogo(asset('images/i2c-logo.png'))
@@ -52,12 +54,12 @@ class AdminPanelProvider extends PanelProvider
                 'logout' => Navigation\MenuItem::make()
                     ->label('Sair'),
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverResources(in: app_path('Filament/Tenant/Resources'), for: 'App\\Filament\\Tenant\\Resources')
+            ->discoverPages(in: app_path('Filament/Tenant/Pages'), for: 'App\\Filament\\Tenant\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Tenant/Widgets'), for: 'App\\Filament\\Tenant\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
@@ -77,6 +79,13 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->tenant(TenantAccount::class, slugAttribute: 'slug')
+            ->tenantRegistration(RegisterTenantAccount::class)
+            ->tenantProfile(EditTenantAccount::class)
+            ->tenantMenu(
+                fn(): bool =>
+                !auth()->user()->hasAnyRole(['Superadministrador'])
+            )
             ->databaseTransactions();
     }
 }

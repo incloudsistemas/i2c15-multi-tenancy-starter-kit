@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tenant_accounts', function (Blueprint $table) {
             $table->id();
-            // Usuário titular da conta
+            // Plano da conta
             $table->foreignId('plan_id')->nullable();
             $table->foreign('plan_id')
                 ->references('id')

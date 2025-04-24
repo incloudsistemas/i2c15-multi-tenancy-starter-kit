@@ -26,7 +26,7 @@ return new class extends Migration
                 ->on('tenant_categories')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-            // Não permite usuários repetidos por conta.
+            // Não permite categorias repetidas por conta.
             $table->unique(['tenant_account_id', 'category_id'], 'tenant_account_category_unique');
         });
     }

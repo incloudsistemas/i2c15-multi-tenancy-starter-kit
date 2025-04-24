@@ -95,6 +95,14 @@ class User extends Authenticatable implements FilamentUser, HasTenants, HasMedia
 
     public function canAccessTenant(Model $tenant): bool
     {
+        if (!($tenant instanceof TenantAccount)) {
+            return false;
+        }
+
+        if (!((int) $tenant->status->value === 1)) {
+            return false;
+        }
+
         return $this->tenantAccounts()
             ->whereKey($tenant)
             ->exists();
@@ -102,12 +110,11 @@ class User extends Authenticatable implements FilamentUser, HasTenants, HasMedia
 
     public function canAccessPanel(Panel $panel): bool
     {
-        if ((int) $this->status->value === 0) {
-            // auth()->logout();
+        if (!((int) $this->status->value === 1)) {
             return false;
         }
 
-        if ($panel->getId() === 'i2c-admin') {
+        if ($panel->getId() === 'admin') {
             return auth()->user()->hasAnyRole(['Superadministrador', 'Administrador']);
         }
 

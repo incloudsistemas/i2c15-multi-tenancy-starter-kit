@@ -17,7 +17,8 @@ class TenantAccountsSeeder extends Seeder
     {
         $this->truncateTable();
 
-        TenantAccount::factory(30)->create();
+        TenantAccount::factory(30)
+            ->create();
     }
 
     protected function truncateTable()

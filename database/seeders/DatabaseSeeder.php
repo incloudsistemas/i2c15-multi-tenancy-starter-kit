@@ -21,9 +21,9 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             UsersSeeder::class,
 
-            TenantPlansSeeder::class,
-            TenantCategoriesSeeder::class,
-            TenantAccountsSeeder::class,
+            // TenantPlansSeeder::class,
+            // TenantCategoriesSeeder::class,
+            // TenantAccountsSeeder::class,
         ]);
     }
 }

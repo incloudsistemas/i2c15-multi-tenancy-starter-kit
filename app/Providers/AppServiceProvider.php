@@ -23,19 +23,19 @@ class AppServiceProvider extends ServiceProvider
     {
         PanelSwitch::configureUsing(function (PanelSwitch $panelSwitch) {
             $panelSwitch->panels([
-                    'i2c-admin',
-                    'admin',
-                ])
+                'admin',
+                'tenant',
+            ])
                 ->modalHeading('Painéis')
                 // ->simple()
                 ->modalWidth('sm')
                 ->labels([
-                    'i2c-admin' => __('Painel Administrador'),
-                    'admin'     => __('Painel Cliente'),
+                    'admin'  => __('Painel Administrador'),
+                    'tenant' => __('Painel Cliente'),
                 ])
                 ->icons([
-                    'i2c-admin' => 'heroicon-m-cog-6-tooth',
-                    'admin'     => 'heroicon-s-user',
+                    'admin'  => 'heroicon-m-cog-6-tooth',
+                    'tenant' => 'heroicon-s-user',
                 ], $asImage = false)
                 ->iconSize(32)
                 ->visible(
